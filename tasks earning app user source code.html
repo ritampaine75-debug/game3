@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="userPageTitle">Brainy - Earn Real Money</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, #2ecc71, #1abc9c);
+        }
+
+        body {
+            background: var(--gradient);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Auth Screen */
+        #authScreen {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-top: 50px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-weight: 600;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-form h2 {
+            margin-bottom: 20px;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        /* App Container */
+        #appContainer {
+            display: none;
+        }
+
+        /* Header */
+        .app-header {
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 20px 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            overflow: hidden;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .app-name {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .balance-label {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .conversion-text {
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 15px;
+            background: rgba(46, 204, 113, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Offer Cards */
+        .offer-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .offer-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px 15px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .offer-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 22px;
+        }
+
+        .offer-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .offer-subtitle {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        /* Section */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Tasks */
+        .task-category {
+            margin-bottom: 25px;
+        }
+
+        .category-title {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-info h4 {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .task-info p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .task-reward {
+            background: var(--gradient);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* Game Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 95%;
+            height: 80%;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background: var(--gradient);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .game-iframe {
+            width: 100%;
+            height: calc(100% - 60px);
+            border: none;
+        }
+
+        /* Spin Wheel */
+        .spin-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 30px auto;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff7675, #fd79a8, #a29bfe, #74b9ff,
+                #55efc4, #ffeaa7, #fab1a0, #ff7675
+            );
+            position: relative;
+            transition: transform 3s cubic-bezier(0.2, 0.8, 0.3, 1);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: var(--danger);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 10;
+        }
+
+        .spin-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+            transition: all 0.3s;
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--gray);
+            cursor: pointer;
+            transition: color 0.3s;
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Ad Overlay */
+        .ad-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+        }
+
+        .ad-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .ad-text {
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 80%;
+        }
+
+        .ad-countdown {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 30px 0;
+            color: var(--warning);
+        }
+
+        .skip-ad-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .skip-ad-btn.enabled {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .offer-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .balance-amount {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="color: white; margin-top: 20px; font-size: 18px;">Loading Brainy App...</p>
+    </div>
+
+    <!-- Authentication Screen -->
+    <div id="authScreen">
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
+                <div class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</div>
+            </div>
+            
+            <div id="loginForm" class="auth-form active">
+                <h2>Welcome Back!</h2>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password">
+                </div>
+                <button class="btn btn-primary" onclick="login()">Login</button>
+                <p id="loginError" style="color: #e74c3c; margin-top: 15px; text-align: center; display: none;"></p>
+            </div>
+            
+            <div id="signupForm" class="auth-form">
+                <h2>Create Account</h2>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" class="form-control" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" class="form-control" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" class="form-control" placeholder="Create a password">
+                </div>
+                <div class="form-group">
+                    <label>Referral Code (Optional)</label>
+                    <input type="text" id="signupReferral" class="form-control" placeholder="Enter referral code if any">
+                </div>
+                <button class="btn btn-primary" onclick="signup()">Sign Up</button>
+                <p id="signupError" style="color: #e74c3c; margin-top: 15px; text-align: center; display: none;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="appContainer">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="logo-container">
+                <div class="logo" id="userAppLogo">
+                    <!-- Logo will be dynamically loaded here -->
+                </div>
+                <div class="app-name" id="userAppName">Brainy</div>
+            </div>
+            <div class="user-avatar" onclick="showSection('profile')" id="userAvatar">U</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Home Section -->
+            <div id="homeSection" class="section active">
+                <!-- Balance Card -->
+                <div class="balance-card">
+                    <div class="balance-label">Cash Balance</div>
+                    <div class="balance-amount">₹<span id="cashBalance">0.00</span></div>
+                    <div class="conversion-text">
+                        <i class="fas fa-clock"></i> Coins will convert to cash in <span id="conversionTimer">24:00:00</span>
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-value" id="ticketsCount">0</div>
+                        <div class="stat-label">Tickets</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="coinsCount">0</div>
+                        <div class="stat-label">Coins</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="tasksCount">0</div>
+                        <div class="stat-label">Tasks Done</div>
+                    </div>
+                </div>
+
+                <!-- Offer Cards -->
+                <div class="offer-cards">
+                    <div class="offer-card" onclick="showSection('tasks')">
+                        <div class="offer-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <div class="offer-title">Super Offers</div>
+                        <div class="offer-subtitle">Earn up to 35k coins</div>
+                    </div>
+                    <div class="offer-card" onclick="earnTicket()">
+                        <div class="offer-icon">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <div class="offer-title">Earn Ticket</div>
+                        <div class="offer-subtitle">Watch ad for free ticket</div>
+                    </div>
+                    <div class="offer-card" onclick="showSection('games')">
+                        <div class="offer-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="offer-title">Play Games</div>
+                        <div class="offer-subtitle">Enjoy & earn rewards</div>
+                    </div>
+                    <div class="offer-card" onclick="showSection('spin')">
+                        <div class="offer-icon">
+                            <i class="fas fa-dharmachakra"></i>
+                        </div>
+                        <div class="offer-title">Spin & Win</div>
+                        <div class="offer-subtitle">Use tickets to spin</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div id="tasksSection" class="section">
+                <div class="section-header">
+                    <button class="back-btn" onclick="showSection('home')"><i class="fas fa-arrow-left"></i></button>
+                    <div class="section-title">Super Offers</div>
+                    <div style="width: 40px;"></div>
+                </div>
+                <div id="tasksList">
+                    <!-- Tasks will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Games Section -->
+            <div id="gamesSection" class="section">
+                <div class="section-header">
+                    <button class="back-btn" onclick="showSection('home')"><i class="fas fa-arrow-left"></i></button>
+                    <div class="section-title">Play Games</div>
+                    <div style="width: 40px;"></div>
+                </div>
+                <div id="gamesList">
+                    <!-- Games will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Spin Section -->
+            <div id="spinSection" class="section">
+                <div class="section-header">
+                    <button class="back-btn" onclick="showSection('home')"><i class="fas fa-arrow-left"></i></button>
+                    <div class="section-title">Spin & Win</div>
+                    <div style="width: 40px;"></div>
+                </div>
+                <div class="spin-container">
+                    <div class="wheel-container">
+                        <div class="wheel-pointer"></div>
+                        <div class="wheel" id="wheel"></div>
+                    </div>
+                    <p style="margin: 20px 0; color: var(--dark);">Tickets available: <strong id="availableTickets">0</strong></p>
+                    <button class="spin-btn" id="spinButton" onclick="startSpin()">SPIN (1 Ticket)</button>
+                    <p style="margin-top: 20px; color: var(--gray); font-size: 14px;">Last reward: <span id="lastReward">0 coins</span></p>
+                </div>
+            </div>
+
+            <!-- Wallet Section -->
+            <div id="walletSection" class="section">
+                <div class="section-header">
+                    <button class="back-btn" onclick="showSection('home')"><i class="fas fa-arrow-left"></i></button>
+                    <div class="section-title">Wallet</div>
+                    <div style="width: 40px;"></div>
+                </div>
+                <div class="balance-card">
+                    <div class="balance-label">Total Balance</div>
+                    <div class="balance-amount">₹<span id="walletBalance">0.00</span></div>
+                    <div style="margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Available Coins:</span>
+                            <strong id="availableCoins">0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Locked Coins:</span>
+                            <strong id="lockedCoins">0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Conversion Rate:</span>
+                            <strong>1000 coins = ₹1</strong>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: white; border-radius: 15px; padding: 20px; margin-top: 20px;">
+                    <h3 style="margin-bottom: 15px; color: var(--dark);">Withdraw Money</h3>
+                    <div class="form-group">
+                        <label>Amount (₹)</label>
+                        <input type="number" id="withdrawAmount" class="form-control" placeholder="Enter amount">
+                    </div>
+                    <div class="form-group">
+                        <label>UPI ID / Payment Details</label>
+                        <input type="text" id="withdrawDetails" class="form-control" placeholder="Enter UPI ID or email">
+                    </div>
+                    <button class="btn btn-primary" onclick="requestWithdraw()">Request Withdrawal</button>
+                    <p style="color: var(--gray); font-size: 12px; margin-top: 15px; text-align: center;">Minimum withdrawal: ₹50</p>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profileSection" class="section">
+                <div class="section-header">
+                    <button class="back-btn" onclick="showSection('home')"><i class="fas fa-arrow-left"></i></button>
+                    <div class="section-title">Profile</div>
+                    <div style="width: 40px;"></div>
+                </div>
+                <div style="background: white; border-radius: 20px; padding: 25px; text-align: center; margin-bottom: 20px;">
+                    <div class="user-avatar" style="width: 80px; height: 80px; margin: 0 auto 15px; font-size: 32px;" id="profileAvatar"></div>
+                    <h3 id="profileName" style="color: var(--dark); margin-bottom: 5px;"></h3>
+                    <p id="profileEmail" style="color: var(--gray); margin-bottom: 20px;"></p>
+                    <div style="background: rgba(46, 204, 113, 0.1); padding: 15px; border-radius: 10px;">
+                        <p style="color: var(--gray); font-size: 14px; margin-bottom: 5px;">Your Referral Code</p>
+                        <p id="referralCode" style="font-size: 22px; font-weight: 800; color: var(--primary); letter-spacing: 3px;"></p>
+                        <button class="btn btn-primary" onclick="copyReferralCode()" style="margin-top: 10px; padding: 10px 20px; width: auto;">
+                            <i class="fas fa-copy"></i> Copy Code
+                        </button>
+                    </div>
+                </div>
+                <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px;">
+                    <h4 style="margin-bottom: 15px; color: var(--dark);">Account Details</h4>
+                    <button class="btn" onclick="editProfile()" style="background: #f8f9fa; color: var(--dark); margin-bottom: 10px;">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button class="btn" onclick="showHistory()" style="background: #f8f9fa; color: var(--dark); margin-bottom: 10px;">
+                        <i class="fas fa-history"></i> Transaction History
+                    </button>
+                    <button class="btn" onclick="showNotifications()" style="background: #f8f9fa; color: var(--dark); margin-bottom: 10px;">
+                        <i class="fas fa-bell"></i> Notifications
+                    </button>
+                    <button class="btn" onclick="logout()" style="background: #ffeaa7; color: #e17055;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <a class="nav-item active" onclick="showSection('home')">
+                <div class="nav-icon"><i class="fas fa-home"></i></div>
+                <div class="nav-label">Home</div>
+            </a>
+            <a class="nav-item" onclick="showSection('tasks')">
+                <div class="nav-icon"><i class="fas fa-tasks"></i></div>
+                <div class="nav-label">Tasks</div>
+            </a>
+            <a class="nav-item" onclick="showSection('games')">
+                <div class="nav-icon"><i class="fas fa-gamepad"></i></div>
+                <div class="nav-label">Games</div>
+            </a>
+            <a class="nav-item" onclick="showSection('wallet')">
+                <div class="nav-icon"><i class="fas fa-wallet"></i></div>
+                <div class="nav-label">Wallet</div>
+            </a>
+            <a class="nav-item" onclick="showSection('profile')">
+                <div class="nav-icon"><i class="fas fa-user"></i></div>
+                <div class="nav-label">Profile</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Game Modal -->
+    <div class="modal-overlay" id="gameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="gameModalTitle">Playing Game</h3>
+                <button class="modal-close" onclick="closeGameModal()">&times;</button>
+            </div>
+            <iframe class="game-iframe" id="gameIframe" src=""></iframe>
+        </div>
+    </div>
+
+    <!-- Ad Overlay -->
+    <div class="ad-overlay" id="adOverlay">
+        <h2 class="ad-title">Sponsored Ad</h2>
+        <p class="ad-text" id="adText">Watch this ad to continue. Please wait...</p>
+        <div class="ad-countdown" id="adCountdown">5</div>
+        <button class="skip-ad-btn" id="skipAdBtn" onclick="skipAd()">Skip Ad</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyAkMGGPB5WYc7gqvLX2uZkz--U882n24k0",
+  authDomain: "ritabhm-d66e1.firebaseapp.com",
+  databaseURL: "https://ritabhm-d66e1-default-rtdb.firebaseio.com",
+  projectId: "ritabhm-d66e1",
+  storageBucket: "ritabhm-d66e1.firebasestorage.app",
+  messagingSenderId: "172265757774",
+  appId: "1:172265757774:web:bb5fcd056369f2b48b771f"
+};
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // App State
+        let currentUser = null;
+        let userData = null;
+        let adCallback = null;
+        let adCountdownInterval = null;
+        let adSeconds = 5;
+        let userDataUnsubscribe = null;
+        let appSettingsUnsubscribe = null;
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            
+            setTimeout(function() {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('authScreen').style.display = 'block';
+                console.log('Auth screen should be visible now');
+            }, 500);
+            
+            const savedUser = localStorage.getItem('brainyUser');
+            if (savedUser) {
+                try {
+                    const userData = JSON.parse(savedUser);
+                    console.log('Found saved user:', userData.email);
+                    
+                    auth.onAuthStateChanged((user) => {
+                        if (user) {
+                            console.log('Firebase user restored:', user.email);
+                            currentUser = user;
+                            loadUserData();
+                            loadAppSettings();
+                        } else {
+                            localStorage.removeItem('brainyUser');
+                            showAuthScreen();
+                        }
+                    });
+                } catch(e) {
+                    console.error('Error parsing saved user:', e);
+                    localStorage.removeItem('brainyUser');
+                    showAuthScreen();
+                }
+            } else {
+                auth.onAuthStateChanged((user) => {
+                    console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+                    if (user) {
+                        currentUser = user;
+                        loadUserData();
+                        loadAppSettings();
+                    } else {
+                        showAuthScreen();
+                    }
+                });
+            }
+        });
+
+        // Load app settings dynamically
+        function loadAppSettings() {
+            // Set up real-time listener for app settings
+            appSettingsUnsubscribe = db.collection('appSettings').doc('main').onSnapshot(
+                (doc) => {
+                    if (doc.exists) {
+                        const settings = doc.data();
+                        updateUserAppSettings(settings);
+                    }
+                },
+                (error) => {
+                    console.error('Error loading app settings:', error);
+                }
+            );
+        }
+
+        // Update user app with app settings
+        function updateUserAppSettings(settings) {
+            // Update app name in header
+            document.getElementById('userAppName').textContent = settings.appName || 'Brainy';
+            document.getElementById('userPageTitle').textContent = settings.appName + ' - Earn Real Money';
+            
+            // Update ad text
+            document.getElementById('adText').textContent = settings.adText || 'Watch this ad to continue. Please wait...';
+            
+            // Update logo in header
+            const userAppLogo = document.getElementById('userAppLogo');
+            if (settings.logoUrl && settings.logoUrl.trim() !== '') {
+                userAppLogo.innerHTML = `<img src="${settings.logoUrl}" alt="${settings.appName} Logo">`;
+            } else {
+                userAppLogo.innerHTML = 'B';
+                userAppLogo.style.display = 'flex';
+                userAppLogo.style.alignItems = 'center';
+                userAppLogo.style.justifyContent = 'center';
+                userAppLogo.style.color = 'white';
+                userAppLogo.style.fontSize = '20px';
+                userAppLogo.style.fontWeight = 'bold';
+            }
+            
+            // Update primary color
+            if (settings.primaryColor) {
+                document.documentElement.style.setProperty('--primary', settings.primaryColor);
+                document.documentElement.style.setProperty('--primary-dark', adjustColor(settings.primaryColor, -20));
+                document.documentElement.style.setProperty('--gradient', `linear-gradient(135deg, ${settings.primaryColor}, ${adjustColor(settings.primaryColor, 40)})`);
+            }
+        }
+
+        // Helper function to adjust color brightness
+        function adjustColor(color, amount) {
+            return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+        }
+
+        // Auth Functions
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+                document.getElementById('signupForm').classList.add('active');
+            }
+        }
+
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorElement = document.getElementById('loginError');
+            
+            if (!email || !password) {
+                errorElement.textContent = 'Please fill all fields';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            errorElement.style.display = 'none';
+            
+            const loginBtn = document.querySelector('#loginForm .btn-primary');
+            const originalText = loginBtn.textContent;
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.disabled = true;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log('Login successful:', userCredential.user.email);
+                    errorElement.style.display = 'none';
+                    
+                    localStorage.setItem('brainyUser', JSON.stringify({
+                        uid: userCredential.user.uid,
+                        email: userCredential.user.email
+                    }));
+                    
+                    currentUser = userCredential.user;
+                    loadUserData();
+                    loadAppSettings();
+                })
+                .catch((error) => {
+                    console.error('Login error:', error);
+                    errorElement.textContent = error.message;
+                    errorElement.style.display = 'block';
+                    
+                    loginBtn.textContent = originalText;
+                    loginBtn.disabled = false;
+                });
+        }
+
+        function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const referral = document.getElementById('signupReferral').value;
+            const errorElement = document.getElementById('signupError');
+            
+            if (!name || !email || !password) {
+                errorElement.textContent = 'Please fill all required fields';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            errorElement.style.display = 'none';
+            
+            const signupBtn = document.querySelector('#signupForm .btn-primary');
+            const originalText = signupBtn.textContent;
+            signupBtn.textContent = 'Creating account...';
+            signupBtn.disabled = true;
+            
+            const userReferralCode = generateReferralCode();
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log('Signup successful:', userCredential.user.email);
+                    
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        uid: userCredential.user.uid,
+                        name: name,
+                        email: email,
+                        referralCode: userReferralCode,
+                        coins: 0,
+                        tickets: 5,
+                        balance: 0,
+                        tasksCompleted: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        isBanned: false,
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    errorElement.style.display = 'none';
+                    
+                    localStorage.setItem('brainyUser', JSON.stringify({
+                        uid: auth.currentUser.uid,
+                        email: auth.currentUser.email
+                    }));
+                    
+                    if (referral && referral.trim() !== '') {
+                        applyReferralBonus(referral.trim(), auth.currentUser.uid);
+                    }
+                    
+                    alert('Account created successfully! You received 5 free tickets!');
+                    
+                    currentUser = auth.currentUser;
+                    loadUserData();
+                    loadAppSettings();
+                })
+                .catch((error) => {
+                    console.error('Signup error:', error);
+                    errorElement.textContent = error.message;
+                    errorElement.style.display = 'block';
+                    
+                    signupBtn.textContent = originalText;
+                    signupBtn.disabled = false;
+                });
+        }
+
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function applyReferralBonus(referralCode, newUserId) {
+            db.collection('users').where('referralCode', '==', referralCode).get()
+                .then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        const referrerDoc = querySnapshot.docs[0];
+                        const referrerId = referrerDoc.id;
+                        
+                        db.collection('users').doc(referrerId).update({
+                            coins: firebase.firestore.FieldValue.increment(1000)
+                        });
+                        
+                        db.collection('users').doc(newUserId).update({
+                            coins: firebase.firestore.FieldValue.increment(1000)
+                        });
+                        
+                        db.collection('referrals').add({
+                            referrerId: referrerId,
+                            referredId: newUserId,
+                            bonusCoins: 1000,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        
+                        alert('Referral bonus applied! You and your referrer received 1000 coins each!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Referral error:', error);
+                });
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('brainyUser');
+                
+                // Unsubscribe from listeners
+                if (userDataUnsubscribe) {
+                    userDataUnsubscribe();
+                }
+                if (appSettingsUnsubscribe) {
+                    appSettingsUnsubscribe();
+                }
+                
+                auth.signOut().then(() => {
+                    showAuthScreen();
+                });
+            }
+        }
+
+        // UI Functions
+        function showAuthScreen() {
+            console.log('Showing auth screen');
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'block';
+            document.getElementById('appContainer').style.display = 'none';
+            
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('signupName').value = '';
+            document.getElementById('signupEmail').value = '';
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('signupReferral').value = '';
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('signupError').style.display = 'none';
+            
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.disabled = false;
+                if (btn.textContent.includes('Logging') || btn.textContent.includes('Creating')) {
+                    btn.textContent = btn.closest('#loginForm') ? 'Login' : 'Sign Up';
+                }
+            });
+            
+            switchAuthTab('login');
+        }
+
+        function showApp() {
+            console.log('Showing app');
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+        }
+
+        function showSection(sectionId) {
+            console.log('Showing section:', sectionId);
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId + 'Section').classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (sectionId === 'home') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+            } else if (sectionId === 'tasks') {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                loadTasks();
+            } else if (sectionId === 'games') {
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+                loadGames();
+            } else if (sectionId === 'wallet') {
+                document.querySelectorAll('.nav-item')[3].classList.add('active');
+            } else if (sectionId === 'profile') {
+                document.querySelectorAll('.nav-item')[4].classList.add('active');
+                loadProfile();
+            }
+        }
+
+        // Data Loading Functions
+        function loadUserData() {
+            if (!currentUser) {
+                console.error('No current user');
+                showAuthScreen();
+                return;
+            }
+            
+            console.log('Loading user data for:', currentUser.uid);
+            
+            userDataUnsubscribe = db.collection('users').doc(currentUser.uid).onSnapshot(
+                (doc) => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        console.log('User data loaded:', userData);
+                        updateUI();
+                        showApp();
+                    } else {
+                        console.error('User document does not exist');
+                        db.collection('users').doc(currentUser.uid).set({
+                            uid: currentUser.uid,
+                            name: currentUser.displayName || currentUser.email.split('@')[0],
+                            email: currentUser.email,
+                            referralCode: generateReferralCode(),
+                            coins: 0,
+                            tickets: 5,
+                            balance: 0,
+                            tasksCompleted: 0,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            isBanned: false,
+                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                        }).then(() => {
+                            console.log('Created new user document');
+                            loadUserData();
+                        });
+                    }
+                },
+                (error) => {
+                    console.error('Error loading user data:', error);
+                    alert('Error loading user data. Please try logging in again.');
+                    logout();
+                }
+            );
+        }
+
+        function updateUI() {
+            if (!userData) {
+                console.error('No user data to update UI');
+                return;
+            }
+            
+            console.log('Updating UI with user data');
+            
+            document.getElementById('cashBalance').textContent = (userData.balance || 0).toFixed(2);
+            document.getElementById('walletBalance').textContent = (userData.balance || 0).toFixed(2);
+            
+            document.getElementById('coinsCount').textContent = (userData.coins || 0).toLocaleString();
+            document.getElementById('availableCoins').textContent = (userData.coins || 0).toLocaleString();
+            
+            document.getElementById('ticketsCount').textContent = userData.tickets || 0;
+            document.getElementById('availableTickets').textContent = userData.tickets || 0;
+            
+            document.getElementById('tasksCount').textContent = userData.tasksCompleted || 0;
+            
+            const locked = Math.floor((userData.coins || 0) * 0.3);
+            document.getElementById('lockedCoins').textContent = locked.toLocaleString();
+            
+            document.getElementById('profileName').textContent = userData.name || 'User';
+            document.getElementById('profileEmail').textContent = userData.email || 'No email';
+            document.getElementById('referralCode').textContent = userData.referralCode || 'N/A';
+            
+            const initials = (userData.name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            document.getElementById('userAvatar').textContent = initials;
+            document.getElementById('profileAvatar').textContent = initials;
+        }
+
+        // Tasks Functions
+        function loadTasks() {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '<p style="color: white; text-align: center; padding: 20px;">Loading tasks...</p>';
+            
+            db.collection('tasks').where('isActive', '==', true).get()
+                .then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        tasksList.innerHTML = '<p style="color: white; text-align: center; padding: 20px;">No tasks available at the moment. Check back later!</p>';
+                        return;
+                    }
+                    
+                    const categories = {};
+                    querySnapshot.forEach(doc => {
+                        const task = doc.data();
+                        task.id = doc.id;
+                        
+                        if (!categories[task.category]) {
+                            categories[task.category] = [];
+                        }
+                        categories[task.category].push(task);
+                    });
+                    
+                    tasksList.innerHTML = '';
+                    Object.keys(categories).forEach(category => {
+                        const categoryDiv = document.createElement('div');
+                        categoryDiv.className = 'task-category';
+                        
+                        const categoryTitle = document.createElement('div');
+                        categoryTitle.className = 'category-title';
+                        categoryTitle.textContent = category + ' Tasks';
+                        categoryDiv.appendChild(categoryTitle);
+                        
+                        categories[category].forEach(task => {
+                            const taskItem = document.createElement('div');
+                            taskItem.className = 'task-item';
+                            taskItem.innerHTML = `
+                                <div class="task-info">
+                                    <h4>${task.title}</h4>
+                                    <p>${task.description || 'Complete this task to earn coins'}</p>
+                                </div>
+                                <div class="task-reward">${(task.rewardCoins || 0).toLocaleString()} coins</div>
+                            `;
+                            taskItem.onclick = () => startTask(task);
+                            categoryDiv.appendChild(taskItem);
+                        });
+                        
+                        tasksList.appendChild(categoryDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading tasks:', error);
+                    tasksList.innerHTML = '<p style="color: white; text-align: center; padding: 20px;">Error loading tasks. Please try again.</p>';
+                });
+        }
+
+        function startTask(task) {
+            if (!userData) {
+                alert('Please login first');
+                return;
+            }
+            
+            showAdThen(() => {
+                if (task.targetLink && task.targetLink !== '') {
+                    window.open(task.targetLink, '_blank');
+                }
+                
+                const proof = prompt(`Please provide proof for "${task.title}" (screenshot URL, username, or email):`);
+                if (proof && proof.trim() !== '') {
+                    submitTaskProof(task, proof.trim());
+                } else {
+                    alert('Proof submission cancelled');
+                }
+            });
+        }
+
+        function submitTaskProof(task, proof) {
+            if (!currentUser || !userData) {
+                alert('Please login first');
+                return;
+            }
+            
+            db.collection('taskSubmissions').add({
+                userId: currentUser.uid,
+                userName: userData.name,
+                userEmail: userData.email,
+                taskId: task.id,
+                taskTitle: task.title,
+                taskReward: task.rewardCoins || 0,
+                proof: proof,
+                status: 'pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert('✅ Task submitted successfully! Please wait for admin approval. You will receive ' + (task.rewardCoins || 0) + ' coins once approved.');
+            }).catch(error => {
+                alert('❌ Error submitting task: ' + error.message);
+            });
+        }
+
+        // Games Functions
+        function loadGames() {
+            const gamesList = document.getElementById('gamesList');
+            
+            const games = [
+                { name: "Yetisensation", url: "https://gemioli.com/yetisensation/html5/gemioli/", icon: "❄️" },
+                { name: "Slinguin", url: "https://gemioli.com/slinguin/html5/gemioli/", icon: "🐧" },
+                { name: "The Saloon", url: "https://gemioli.com/thesaloon/html5/gemioli/", icon: "🎪" },
+                { name: "The Pirate Ship", url: "https://gemioli.com/thepirateship/", icon: "🏴‍☠️" }
+            ];
+            
+            gamesList.innerHTML = '';
+            games.forEach(game => {
+                const gameCard = document.createElement('div');
+                gameCard.className = 'offer-card';
+                gameCard.innerHTML = `
+                    <div class="offer-icon">${game.icon}</div>
+                    <div class="offer-title">${game.name}</div>
+                    <div class="offer-subtitle">Click to play</div>
+                `;
+                gameCard.onclick = () => playGame(game);
+                gamesList.appendChild(gameCard);
+            });
+        }
+
+        function playGame(game) {
+            showAdThen(() => {
+                document.getElementById('gameModalTitle').textContent = game.name;
+                document.getElementById('gameIframe').src = game.url;
+                document.getElementById('gameModal').style.display = 'flex';
+            });
+        }
+
+        function closeGameModal() {
+            document.getElementById('gameModal').style.display = 'none';
+            document.getElementById('gameIframe').src = '';
+        }
+
+        // Spin Functions
+        function startSpin() {
+            if (!userData || userData.tickets < 1) {
+                alert('You need at least 1 ticket to spin! Go to Home > Earn Ticket to get free tickets.');
+                return;
+            }
+            
+            showAdThen(() => {
+                db.collection('users').doc(currentUser.uid).update({
+                    tickets: firebase.firestore.FieldValue.increment(-1)
+                });
+                
+                const spinBtn = document.getElementById('spinButton');
+                spinBtn.disabled = true;
+                spinBtn.textContent = 'Spinning...';
+                
+                const rewards = [0, 2, 5, 7, 10, 15, 20, 50];
+                const reward = rewards[Math.floor(Math.random() * rewards.length)];
+                
+                const wheel = document.getElementById('wheel');
+                const spins = 5 + Math.random() * 3;
+                wheel.style.transform = `rotate(${spins * 360 + (reward * 18)}deg)`;
+                
+                setTimeout(() => {
+                    db.collection('users').doc(currentUser.uid).update({
+                        coins: firebase.firestore.FieldValue.increment(reward)
+                    });
+                    
+                    document.getElementById('lastReward').textContent = `${reward} coins`;
+                    
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = 'SPIN (1 Ticket)';
+                    
+                    if (reward > 0) {
+                        alert(`🎉 Congratulations! You won ${reward} coins!`);
+                    } else {
+                        alert('😞 Better luck next time!');
+                    }
+                }, 3000);
+            });
+        }
+
+        // Ticket Functions
+        function earnTicket() {
+            if (!userData) {
+                alert('Please login first');
+                return;
+            }
+            
+            showAdThen(() => {
+                db.collection('users').doc(currentUser.uid).update({
+                    tickets: firebase.firestore.FieldValue.increment(1)
+                }).then(() => {
+                    alert('✅ You earned 1 free ticket!');
+                }).catch(error => {
+                    alert('❌ Error earning ticket: ' + error.message);
+                });
+            });
+        }
+
+        // Wallet Functions
+        function requestWithdraw() {
+            if (!userData) {
+                alert('Please login first');
+                return;
+            }
+            
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const details = document.getElementById('withdrawDetails').value;
+            
+            if (!amount || amount < 50) {
+                alert('Minimum withdrawal amount is ₹50');
+                return;
+            }
+            
+            if (!details) {
+                alert('Please provide payment details (UPI ID, PhonePe, PayPal email, etc.)');
+                return;
+            }
+            
+            const coinsNeeded = amount * 1000;
+            
+            if (userData.coins < coinsNeeded) {
+                alert(`You need ${coinsNeeded.toLocaleString()} coins to withdraw ₹${amount}. You have ${userData.coins.toLocaleString()} coins.`);
+                return;
+            }
+            
+            if (confirm(`Request withdrawal of ₹${amount}? This will deduct ${coinsNeeded.toLocaleString()} coins from your account.`)) {
+                db.collection('users').doc(currentUser.uid).update({
+                    coins: firebase.firestore.FieldValue.increment(-coinsNeeded)
+                });
+                
+                db.collection('withdrawals').add({
+                    userId: currentUser.uid,
+                    userName: userData.name,
+                    userEmail: userData.email,
+                    amount: amount,
+                    coins: coinsNeeded,
+                    details: details,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    alert('✅ Withdrawal request submitted! It will be processed within 24-48 hours.');
+                    document.getElementById('withdrawAmount').value = '';
+                    document.getElementById('withdrawDetails').value = '';
+                }).catch(error => {
+                    alert('❌ Error submitting withdrawal: ' + error.message);
+                });
+            }
+        }
+
+        // Profile Functions
+        function loadProfile() {
+            // Already handled in updateUI()
+        }
+
+        function copyReferralCode() {
+            const code = document.getElementById('referralCode').textContent;
+            if (code && code !== 'N/A') {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('✅ Referral code copied to clipboard!\n\nShare with friends: ' + code);
+                }).catch(err => {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('✅ Referral code copied to clipboard!\n\nShare with friends: ' + code);
+                });
+            } else {
+                alert('Referral code not available');
+            }
+        }
+
+        function editProfile() {
+            const newName = prompt('Enter new name:', userData.name || '');
+            if (newName && newName.trim() !== '') {
+                db.collection('users').doc(currentUser.uid).update({
+                    name: newName.trim()
+                }).then(() => {
+                    alert('✅ Profile updated successfully!');
+                }).catch(error => {
+                    alert('❌ Error updating profile: ' + error.message);
+                });
+            }
+        }
+
+        function showHistory() {
+            alert('📜 Transaction history feature coming soon!');
+        }
+
+        function showNotifications() {
+            alert('🔔 Notifications feature coming soon!');
+        }
+
+        // Ad System
+        function showAdThen(callback) {
+            adCallback = callback;
+            adSeconds = 5;
+            document.getElementById('adCountdown').textContent = adSeconds;
+            document.getElementById('skipAdBtn').classList.remove('enabled');
+            document.getElementById('adOverlay').style.display = 'flex';
+            
+            adCountdownInterval = setInterval(() => {
+                adSeconds--;
+                document.getElementById('adCountdown').textContent = adSeconds;
+                
+                if (adSeconds <= 0) {
+                    clearInterval(adCountdownInterval);
+                    document.getElementById('skipAdBtn').classList.add('enabled');
+                }
+            }, 1000);
+        }
+
+        function skipAd() {
+            if (adSeconds > 0) {
+                alert('Please wait for the ad to finish');
+                return;
+            }
+            
+            clearInterval(adCountdownInterval);
+            document.getElementById('adOverlay').style.display = 'none';
+            
+            if (adCallback) {
+                adCallback();
+                adCallback = null;
+            }
+        }
+
+        // Initialize conversion timer
+        function updateConversionTimer() {
+            const timerElement = document.getElementById('conversionTimer');
+            let totalSeconds = 24 * 60 * 60;
+            
+            const timer = setInterval(() => {
+                totalSeconds--;
+                
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (totalSeconds <= 0) {
+                    clearInterval(timer);
+                    timerElement.textContent = 'Ready!';
+                }
+            }, 1000);
+        }
+
+        // Initialize timer when page loads
+        window.addEventListener('load', updateConversionTimer);
+        
+        // Clean up Firebase listeners when leaving page
+        window.addEventListener('beforeunload', function() {
+            if (userDataUnsubscribe) {
+                userDataUnsubscribe();
+            }
+            if (appSettingsUnsubscribe) {
+                appSettingsUnsubscribe();
+            }
+        });
+    </script>
+    <script src="https://pl28405248.effectivegatecpm.com/81/65/22/816522f67d84669fce27ce8cdbd4c578.js"></script>
+</body>
+</html>

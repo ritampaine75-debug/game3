@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="adminPageTitle">Brainy Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, #2ecc71, #1abc9c);
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Auth Screen */
+        #authScreen {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            margin-top: 100px;
+        }
+
+        .auth-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        /* Admin Container */
+        #adminContainer {
+            display: none;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: var(--dark);
+            color: white;
+            padding: 20px 0;
+            z-index: 100;
+        }
+
+        .logo-area {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .logo-subtext {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-left: 50px;
+            margin-top: -5px;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: rgba(255, 255, 255, 0.8);
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(46, 204, 113, 0.1);
+            border-left-color: var(--primary);
+            color: white;
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .top-header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .logout-btn {
+            background: #ffeaa7;
+            color: #e17055;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .icon-users { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .icon-tasks { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .icon-coins { background: linear-gradient(135deg, #f1c40f, #f39c12); }
+        .icon-withdraw { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #eee;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(243, 156, 18, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--secondary);
+        }
+
+        /* Buttons */
+        .btn-sm {
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Forms */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .logo-text, .logo-subtext, .nav-text {
+                display: none;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="color: white; margin-top: 20px; font-size: 18px;">Loading Admin Panel...</p>
+    </div>
+
+    <!-- Authentication Screen -->
+    <div id="authScreen">
+        <div class="auth-container">
+            <h2><i class="fas fa-lock"></i> Admin Login</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" class="form-control" placeholder="admin@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" class="form-control" placeholder="Enter password">
+            </div>
+            <button class="btn btn-primary" onclick="adminLogin()">Login</button>
+            <p id="loginError" style="color: #e74c3c; margin-top: 15px; text-align: center; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Admin Panel Container -->
+    <div id="adminContainer">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo-area">
+                <div class="logo">
+                    <div class="logo-icon" id="adminLogoIcon">
+                        <!-- Logo will be dynamically loaded here -->
+                    </div>
+                    <div>
+                        <div class="logo-text" id="adminAppName">Brainy</div>
+                        <div class="logo-subtext">Admin Panel</div>
+                    </div>
+                </div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="showAdminSection('dashboard')">
+                    <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <div class="nav-text">Dashboard</div>
+                </li>
+                <li class="nav-item" onclick="showAdminSection('users')">
+                    <div class="nav-icon"><i class="fas fa-users"></i></div>
+                    <div class="nav-text">Users</div>
+                </li>
+                <li class="nav-item" onclick="showAdminSection('tasks')">
+                    <div class="nav-icon"><i class="fas fa-tasks"></i></div>
+                    <div class="nav-text">Tasks</div>
+                </li>
+                <li class="nav-item" onclick="showAdminSection('proofs')">
+                    <div class="nav-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="nav-text">Proof Review</div>
+                </li>
+                <li class="nav-item" onclick="showAdminSection('withdrawals')">
+                    <div class="nav-icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="nav-text">Withdrawals</div>
+                </li>
+                <li class="nav-item" onclick="showAdminSection('settings')">
+                    <div class="nav-icon"><i class="fas fa-cog"></i></div>
+                    <div class="nav-text">Settings</div>
+                </li>
+                <li class="nav-item" onclick="showAdminSection('notifications')">
+                    <div class="nav-icon"><i class="fas fa-bell"></i></div>
+                    <div class="nav-text">Notifications</div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="top-header">
+                <div class="header-title" id="adminSectionTitle">Dashboard</div>
+                <div class="user-info">
+                    <div class="user-avatar" id="adminAvatar">A</div>
+                    <button class="logout-btn" onclick="adminLogout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboardSection" class="section active">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-users">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-value" id="totalUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-tasks">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-value" id="totalTasks">0</div>
+                        <div class="stat-label">Total Tasks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-coins">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-value" id="totalCoins">0</div>
+                        <div class="stat-label">Total Coins</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-withdraw">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-value" id="pendingWithdrawals">0</div>
+                        <div class="stat-label">Pending Withdrawals</div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div class="dashboard-content">
+                    <h3 class="section-title">Recent Activity</h3>
+                    <div class="form-row">
+                        <div style="flex: 2;">
+                            <h4>Leaderboard (Top 5 Users)</h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Name</th>
+                                        <th>Coins</th>
+                                        <th>Tasks</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboardTable">
+                                    <!-- Leaderboard data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="flex: 1; background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                            <h4>Quick Actions</h4>
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                                <button class="btn btn-primary" onclick="showAdminSection('tasks')">
+                                    <i class="fas fa-plus"></i> Add New Task
+                                </button>
+                                <button class="btn btn-secondary" onclick="showAdminSection('proofs')">
+                                    <i class="fas fa-check"></i> Review Proofs
+                                </button>
+                                <button class="btn btn-warning" onclick="showAdminSection('withdrawals')">
+                                    <i class="fas fa-money-check"></i> Process Withdrawals
+                                </button>
+                                <button class="btn btn-success" onclick="showAdminSection('notifications')">
+                                    <i class="fas fa-bullhorn"></i> Send Notification
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="usersSection" class="section">
+                <div class="dashboard-content">
+                    <h3 class="section-title">Users Management</h3>
+                    
+                    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <input type="text" id="searchUsers" class="form-control" placeholder="Search users..." style="width: 300px;">
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="exportUsers()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Coins</th>
+                                <th>Tickets</th>
+                                <th>Balance</th>
+                                <th>Tasks</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <!-- Users data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div id="tasksSection" class="section">
+                <div class="dashboard-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 class="section-title">Tasks Management</h3>
+                        <button class="btn btn-primary" onclick="showTaskModal()">
+                            <i class="fas fa-plus"></i> Add New Task
+                        </button>
+                    </div>
+                    
+                    <div class="tabs">
+                        <div class="tab active" onclick="filterTasks('all')">All Tasks</div>
+                        <div class="tab" onclick="filterTasks('active')">Active</div>
+                        <div class="tab" onclick="filterTasks('inactive')">Inactive</div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Reward</th>
+                                <th>Link</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasksTable">
+                            <!-- Tasks data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Proofs Section -->
+            <div id="proofsSection" class="section">
+                <div class="dashboard-content">
+                    <h3 class="section-title">Task Proof Review</h3>
+                    
+                    <div class="tabs">
+                        <div class="tab active" onclick="filterProofs('pending')">Pending</div>
+                        <div class="tab" onclick="filterProofs('approved')">Approved</div>
+                        <div class="tab" onclick="filterProofs('rejected')">Rejected</div>
+                    </div>
+                    
+                    <div id="proofsList">
+                        <!-- Proofs will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdrawals Section -->
+            <div id="withdrawalsSection" class="section">
+                <div class="dashboard-content">
+                    <h3 class="section-title">Withdrawal Requests</h3>
+                    
+                    <div class="tabs">
+                        <div class="tab active" onclick="filterWithdrawals('pending')">Pending</div>
+                        <div class="tab" onclick="filterWithdrawals('approved')">Approved</div>
+                        <div class="tab" onclick="filterWithdrawals('rejected')">Rejected</div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Amount (₹)</th>
+                                <th>Coins</th>
+                                <th>Method</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalsTable">
+                            <!-- Withdrawals data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settingsSection" class="section">
+                <div class="dashboard-content">
+                    <h3 class="section-title">App Settings</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>App Name</label>
+                            <input type="text" id="appName" class="form-control" value="Brainy">
+                        </div>
+                        <div class="form-group">
+                            <label>App Logo URL</label>
+                            <input type="text" id="appLogo" class="form-control" placeholder="https://example.com/logo.png">
+                            <small style="color: var(--gray);">Leave empty to use default letter</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Conversion Rate</label>
+                            <input type="number" id="conversionRate" class="form-control" value="1000">
+                            <small>coins = ₹1</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Minimum Withdrawal (₹)</label>
+                            <input type="number" id="minWithdraw" class="form-control" value="50">
+                        </div>
+                        <div class="form-group">
+                            <label>Referral Bonus (coins)</label>
+                            <input type="number" id="referralBonus" class="form-control" value="1000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ad Text</label>
+                        <textarea id="adText" class="form-control" rows="3">Watch this ad to continue. Please wait...</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Primary Color</label>
+                        <input type="color" id="primaryColor" class="form-control" value="#2ecc71" style="height: 50px;">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div id="notificationsSection" class="section">
+                <div class="dashboard-content">
+                    <h3 class="section-title">Send Notification</h3>
+                    
+                    <div class="form-group">
+                        <label>Notification Title</label>
+                        <input type="text" id="notificationTitle" class="form-control" placeholder="Enter title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Notification Message</label>
+                        <textarea id="notificationMessage" class="form-control" rows="4" placeholder="Enter message"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Button Link (Optional)</label>
+                        <input type="text" id="notificationLink" class="form-control" placeholder="https://example.com">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="sendNotification()">
+                        <i class="fas fa-paper-plane"></i> Send to All Users
+                    </button>
+                    
+                    <div style="margin-top: 30px;">
+                        <h4>Recent Notifications</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Message</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notificationsTable">
+                                <!-- Notifications will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 15px; padding: 30px; width: 90%; max-width: 500px;">
+            <h3 style="margin-bottom: 20px;">Create New Task</h3>
+            <div class="form-group">
+                <label>Task Title</label>
+                <input type="text" id="taskTitle" class="form-control" placeholder="Follow on Instagram">
+            </div>
+            <div class="form-group">
+                <label>Description / Rules</label>
+                <textarea id="taskDescription" class="form-control" rows="3" placeholder="Follow our Instagram page and stay for 7 days"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="taskCategory" class="form-control">
+                        <option value="Instagram">Instagram</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="Telegram">Telegram</option>
+                        <option value="Website">Website</option>
+                        <option value="App Install">App Install</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reward Coins</label>
+                    <input type="number" id="taskReward" class="form-control" value="1000">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Target Link</label>
+                <input type="text" id="taskLink" class="form-control" placeholder="https://instagram.com/yourpage">
+            </div>
+            <div class="form-group">
+                <label>Banner Image URL (Optional)</label>
+                <input type="text" id="taskBanner" class="form-control" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="taskActive" checked> Active
+                </label>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveTask()" style="flex: 1;">Save Task</button>
+                <button class="btn" onclick="hideTaskModal()" style="flex: 1; background: #f8f9fa;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyAkMGGPB5WYc7gqvLX2uZkz--U882n24k0",
+  authDomain: "ritabhm-d66e1.firebaseapp.com",
+  databaseURL: "https://ritabhm-d66e1-default-rtdb.firebaseio.com",
+  projectId: "ritabhm-d66e1",
+  storageBucket: "ritabhm-d66e1.firebasestorage.app",
+  messagingSenderId: "172265757774",
+  appId: "1:172265757774:web:bb5fcd056369f2b48b771f"
+};
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Admin State
+        let currentAdmin = null;
+        let appSettingsUnsubscribe = null;
+
+        // Initialize Admin Panel
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loader').style.display = 'none';
+            
+            // Check auth state
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentAdmin = user;
+                    loadAdminData();
+                    loadAppSettings(); // Load app settings
+                } else {
+                    showAuthScreen();
+                }
+            });
+        });
+
+        // Load app settings dynamically
+        function loadAppSettings() {
+            // Set up real-time listener for app settings
+            appSettingsUnsubscribe = db.collection('appSettings').doc('main').onSnapshot(
+                (doc) => {
+                    if (doc.exists) {
+                        const settings = doc.data();
+                        updateAdminAppSettings(settings);
+                    } else {
+                        // Create default settings if not exists
+                        const defaultSettings = {
+                            appName: "Brainy",
+                            logoUrl: "",
+                            conversionRate: 1000,
+                            minWithdrawAmount: 50,
+                            referralBonusCoins: 1000,
+                            adText: "Watch this ad to continue. Please wait...",
+                            primaryColor: "#2ecc71",
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        db.collection('appSettings').doc('main').set(defaultSettings);
+                    }
+                },
+                (error) => {
+                    console.error('Error loading app settings:', error);
+                }
+            );
+        }
+
+        // Update admin panel with app settings
+        function updateAdminAppSettings(settings) {
+            // Update app name in sidebar
+            document.getElementById('adminAppName').textContent = settings.appName || 'Brainy';
+            document.getElementById('adminPageTitle').textContent = settings.appName + ' Admin Panel';
+            
+            // Update logo in sidebar
+            const logoIcon = document.getElementById('adminLogoIcon');
+            if (settings.logoUrl && settings.logoUrl.trim() !== '') {
+                logoIcon.innerHTML = `<img src="${settings.logoUrl}" alt="${settings.appName} Logo">`;
+            } else {
+                logoIcon.innerHTML = 'B';
+                logoIcon.style.display = 'flex';
+                logoIcon.style.alignItems = 'center';
+                logoIcon.style.justifyContent = 'center';
+                logoIcon.style.color = 'white';
+                logoIcon.style.fontSize = '20px';
+                logoIcon.style.fontWeight = 'bold';
+            }
+            
+            // Update primary color
+            if (settings.primaryColor) {
+                document.documentElement.style.setProperty('--primary', settings.primaryColor);
+                document.documentElement.style.setProperty('--primary-dark', adjustColor(settings.primaryColor, -20));
+                document.documentElement.style.setProperty('--gradient', `linear-gradient(135deg, ${settings.primaryColor}, ${adjustColor(settings.primaryColor, 40)})`);
+            }
+        }
+
+        // Helper function to adjust color brightness
+        function adjustColor(color, amount) {
+            return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+        }
+
+        // Admin Auth Functions
+        function adminLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorElement = document.getElementById('loginError');
+            
+            if (!email || !password) {
+                errorElement.textContent = 'Please fill all fields';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    errorElement.style.display = 'none';
+                    currentAdmin = userCredential.user;
+                    loadAdminData();
+                    loadAppSettings();
+                })
+                .catch((error) => {
+                    errorElement.textContent = error.message;
+                    errorElement.style.display = 'block';
+                });
+        }
+
+        function adminLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Unsubscribe from app settings listener
+                if (appSettingsUnsubscribe) {
+                    appSettingsUnsubscribe();
+                }
+                auth.signOut();
+            }
+        }
+
+        // UI Functions
+        function showAuthScreen() {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'block';
+            document.getElementById('adminContainer').style.display = 'none';
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('adminContainer').style.display = 'block';
+            
+            // Update admin avatar
+            if (currentAdmin && currentAdmin.email) {
+                const initials = currentAdmin.email.substring(0, 2).toUpperCase();
+                document.getElementById('adminAvatar').textContent = initials;
+            }
+        }
+
+        function showAdminSection(sectionId) {
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.onclick && item.onclick.toString().includes(sectionId)) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            // Show selected section
+            document.getElementById(sectionId + 'Section').classList.add('active');
+            
+            // Update title
+            const titles = {
+                dashboard: 'Dashboard',
+                users: 'Users Management',
+                tasks: 'Tasks Management',
+                proofs: 'Proof Review',
+                withdrawals: 'Withdrawal Requests',
+                settings: 'App Settings',
+                notifications: 'Send Notifications'
+            };
+            document.getElementById('adminSectionTitle').textContent = titles[sectionId];
+            
+            // Load section data
+            if (sectionId === 'dashboard') {
+                loadDashboardData();
+            } else if (sectionId === 'users') {
+                loadUsers();
+            } else if (sectionId === 'tasks') {
+                loadAdminTasks();
+            } else if (sectionId === 'proofs') {
+                loadProofs('pending');
+            } else if (sectionId === 'withdrawals') {
+                loadWithdrawals('pending');
+            } else if (sectionId === 'settings') {
+                loadSettings();
+            } else if (sectionId === 'notifications') {
+                loadNotifications();
+            }
+        }
+
+        // Data Loading Functions
+        async function loadAdminData() {
+            showAdminPanel();
+            loadDashboardData();
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load total users
+                const usersSnapshot = await db.collection('users').get();
+                document.getElementById('totalUsers').textContent = usersSnapshot.size;
+                
+                // Load total tasks
+                const tasksSnapshot = await db.collection('tasks').get();
+                document.getElementById('totalTasks').textContent = tasksSnapshot.size;
+                
+                // Calculate total coins
+                let totalCoins = 0;
+                usersSnapshot.forEach(doc => {
+                    totalCoins += doc.data().coins || 0;
+                });
+                document.getElementById('totalCoins').textContent = totalCoins.toLocaleString();
+                
+                // Load pending withdrawals
+                const withdrawalsSnapshot = await db.collection('withdrawals').where('status', '==', 'pending').get();
+                document.getElementById('pendingWithdrawals').textContent = withdrawalsSnapshot.size;
+                
+                // Load leaderboard
+                loadLeaderboard();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        async function loadLeaderboard() {
+            const usersSnapshot = await db.collection('users')
+                .orderBy('coins', 'desc')
+                .limit(5)
+                .get();
+            
+            const leaderboardTable = document.getElementById('leaderboardTable');
+            leaderboardTable.innerHTML = '';
+            
+            let rank = 1;
+            usersSnapshot.forEach(doc => {
+                const user = doc.data();
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rank}</td>
+                    <td>${user.name}</td>
+                    <td>${user.coins.toLocaleString()}</td>
+                    <td>${user.tasksCompleted || 0}</td>
+                    <td>₹${user.balance?.toFixed(2) || '0.00'}</td>
+                `;
+                leaderboardTable.appendChild(row);
+                rank++;
+            });
+        }
+
+        async function loadUsers() {
+            const usersSnapshot = await db.collection('users').get();
+            const usersTable = document.getElementById('usersTable');
+            usersTable.innerHTML = '';
+            
+            usersSnapshot.forEach(doc => {
+                const user = doc.data();
+                const date = user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.uid.substring(0, 8)}...</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.coins.toLocaleString()}</td>
+                    <td>${user.tickets}</td>
+                    <td>₹${user.balance?.toFixed(2) || '0.00'}</td>
+                    <td>${user.tasksCompleted || 0}</td>
+                    <td>${date}</td>
+                    <td>
+                        <span class="badge ${user.isBanned ? 'badge-danger' : 'badge-success'}">
+                            ${user.isBanned ? 'Banned' : 'Active'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-sm btn-success" onclick="editUser('${doc.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-sm ${user.isBanned ? 'btn-warning' : 'btn-danger'}" onclick="toggleBanUser('${doc.id}', ${user.isBanned || false})">
+                            <i class="fas ${user.isBanned ? 'fa-unlock' : 'fa-ban'}"></i>
+                        </button>
+                    </td>
+                `;
+                usersTable.appendChild(row);
+            });
+        }
+
+        function editUser(userId) {
+            alert(`Edit user ${userId}`);
+        }
+
+        function toggleBanUser(userId, isCurrentlyBanned) {
+            const action = isCurrentlyBanned ? 'unban' : 'ban';
+            if (confirm(`Are you sure you want to ${action} this user?`)) {
+                db.collection('users').doc(userId).update({
+                    isBanned: !isCurrentlyBanned
+                }).then(() => {
+                    alert(`User ${action}ned successfully`);
+                    loadUsers();
+                });
+            }
+        }
+
+        // Tasks Management
+        async function loadAdminTasks() {
+            const tasksSnapshot = await db.collection('tasks').get();
+            const tasksTable = document.getElementById('tasksTable');
+            tasksTable.innerHTML = '';
+            
+            tasksSnapshot.forEach(doc => {
+                const task = doc.data();
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${doc.id.substring(0, 8)}...</td>
+                    <td>${task.title}</td>
+                    <td><span class="badge badge-info">${task.category}</span></td>
+                    <td>${task.rewardCoins.toLocaleString()}</td>
+                    <td><a href="${task.targetLink}" target="_blank">Link</a></td>
+                    <td>
+                        <span class="badge ${task.isActive ? 'badge-success' : 'badge-danger'}">
+                            ${task.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-sm btn-success" onclick="editTask('${doc.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-sm btn-danger" onclick="deleteTask('${doc.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tasksTable.appendChild(row);
+            });
+        }
+
+        function showTaskModal() {
+            document.getElementById('taskModal').style.display = 'flex';
+        }
+
+        function hideTaskModal() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
+        function saveTask() {
+            const taskData = {
+                title: document.getElementById('taskTitle').value,
+                description: document.getElementById('taskDescription').value,
+                category: document.getElementById('taskCategory').value,
+                rewardCoins: parseInt(document.getElementById('taskReward').value),
+                targetLink: document.getElementById('taskLink').value,
+                bannerImageUrl: document.getElementById('taskBanner').value || '',
+                isActive: document.getElementById('taskActive').checked,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            if (!taskData.title || !taskData.description || !taskData.targetLink) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            db.collection('tasks').add(taskData)
+                .then(() => {
+                    alert('Task saved successfully');
+                    hideTaskModal();
+                    loadAdminTasks();
+                })
+                .catch(error => {
+                    alert('Error saving task: ' + error.message);
+                });
+        }
+
+        function editTask(taskId) {
+            alert(`Edit task ${taskId}`);
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                db.collection('tasks').doc(taskId).delete()
+                    .then(() => {
+                        alert('Task deleted successfully');
+                        loadAdminTasks();
+                    });
+            }
+        }
+
+        function filterTasks(status) {
+            document.querySelectorAll('.tabs .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            loadAdminTasks();
+        }
+
+        // Proof Review
+        async function loadProofs(status) {
+            document.querySelectorAll('#proofsSection .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const proofsSnapshot = await db.collection('taskSubmissions')
+                .where('status', '==', status)
+                .get();
+            
+            const proofsList = document.getElementById('proofsList');
+            proofsList.innerHTML = '';
+            
+            if (proofsSnapshot.empty) {
+                proofsList.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 40px;">No proofs found</p>';
+                return;
+            }
+            
+            proofsSnapshot.forEach(async doc => {
+                const proof = doc.data();
+                
+                // Get user data
+                const userDoc = await db.collection('users').doc(proof.userId).get();
+                const user = userDoc.data();
+                
+                const proofCard = document.createElement('div');
+                proofCard.style.background = 'white';
+                proofCard.style.borderRadius = '10px';
+                proofCard.style.padding = '20px';
+                proofCard.style.marginBottom = '15px';
+                proofCard.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                
+                proofCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h4 style="margin-bottom: 5px;">${proof.taskTitle}</h4>
+                            <p style="color: var(--gray); margin-bottom: 10px;">
+                                User: ${user?.name || 'Unknown'} (${user?.email || 'N/A'})
+                            </p>
+                            <p><strong>Proof:</strong> ${proof.proof}</p>
+                            <p style="color: var(--gray); font-size: 14px; margin-top: 10px;">
+                                Submitted: ${new Date(proof.createdAt?.seconds * 1000).toLocaleString()}
+                            </p>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="btn-sm btn-success" onclick="approveProof('${doc.id}', ${proof.rewardCoins}, '${proof.userId}')">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button class="btn-sm btn-danger" onclick="rejectProof('${doc.id}')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                proofsList.appendChild(proofCard);
+            });
+        }
+
+        function approveProof(proofId, rewardCoins, userId) {
+            if (confirm('Approve this proof and award coins?')) {
+                db.collection('taskSubmissions').doc(proofId).update({
+                    status: 'approved',
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                db.collection('users').doc(userId).update({
+                    coins: firebase.firestore.FieldValue.increment(rewardCoins),
+                    tasksCompleted: firebase.firestore.FieldValue.increment(1)
+                });
+                
+                alert('Proof approved! User awarded ' + rewardCoins + ' coins.');
+                loadProofs('pending');
+            }
+        }
+
+        function rejectProof(proofId) {
+            const reason = prompt('Rejection reason:');
+            if (reason !== null) {
+                db.collection('taskSubmissions').doc(proofId).update({
+                    status: 'rejected',
+                    adminNote: reason,
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('Proof rejected.');
+                loadProofs('pending');
+            }
+        }
+
+        function filterProofs(status) {
+            loadProofs(status);
+        }
+
+        // Withdrawals Management
+        async function loadWithdrawals(status) {
+            document.querySelectorAll('#withdrawalsSection .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            let query = db.collection('withdrawals');
+            if (status !== 'all') {
+                query = query.where('status', '==', status);
+            }
+            
+            const withdrawalsSnapshot = await query.get();
+            const withdrawalsTable = document.getElementById('withdrawalsTable');
+            withdrawalsTable.innerHTML = '';
+            
+            withdrawalsSnapshot.forEach(doc => {
+                const withdrawal = doc.data();
+                const date = new Date(withdrawal.createdAt?.seconds * 1000).toLocaleDateString();
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${doc.id.substring(0, 8)}...</td>
+                    <td>${withdrawal.userName}</td>
+                    <td>₹${withdrawal.amount?.toFixed(2)}</td>
+                    <td>${withdrawal.coins?.toLocaleString()}</td>
+                    <td>${withdrawal.details}</td>
+                    <td>${date}</td>
+                    <td>
+                        <span class="badge ${
+                            withdrawal.status === 'approved' ? 'badge-success' :
+                            withdrawal.status === 'rejected' ? 'badge-danger' : 'badge-warning'
+                        }">
+                            ${withdrawal.status}
+                        </span>
+                    </td>
+                    <td>
+                        ${withdrawal.status === 'pending' ? `
+                            <button class="btn-sm btn-success" onclick="processWithdrawal('${doc.id}', 'approved')">
+                                <i class="fas fa-check"></i> Pay
+                            </button>
+                            <button class="btn-sm btn-danger" onclick="processWithdrawal('${doc.id}', 'rejected')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        ` : '-'}
+                    </td>
+                `;
+                withdrawalsTable.appendChild(row);
+            });
+        }
+
+        function processWithdrawal(withdrawalId, action) {
+            const note = prompt(`${action === 'approved' ? 'Payment' : 'Rejection'} note:`);
+            if (note === null) return;
+            
+            db.collection('withdrawals').doc(withdrawalId).update({
+                status: action,
+                processedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                adminNote: note
+            }).then(() => {
+                alert(`Withdrawal ${action}`);
+                loadWithdrawals('pending');
+            });
+        }
+
+        function filterWithdrawals(status) {
+            loadWithdrawals(status);
+        }
+
+        // Settings
+        async function loadSettings() {
+            const settingsDoc = await db.collection('appSettings').doc('main').get();
+            if (settingsDoc.exists) {
+                const settings = settingsDoc.data();
+                document.getElementById('appName').value = settings.appName || 'Brainy';
+                document.getElementById('appLogo').value = settings.logoUrl || '';
+                document.getElementById('conversionRate').value = settings.conversionRate || 1000;
+                document.getElementById('minWithdraw').value = settings.minWithdrawAmount || 50;
+                document.getElementById('referralBonus').value = settings.referralBonusCoins || 1000;
+                document.getElementById('adText').value = settings.adText || 'Watch this ad to continue. Please wait...';
+                document.getElementById('primaryColor').value = settings.primaryColor || '#2ecc71';
+            }
+        }
+
+        function saveSettings() {
+            const settings = {
+                appName: document.getElementById('appName').value,
+                logoUrl: document.getElementById('appLogo').value,
+                conversionRate: parseInt(document.getElementById('conversionRate').value),
+                minWithdrawAmount: parseInt(document.getElementById('minWithdraw').value),
+                referralBonusCoins: parseInt(document.getElementById('referralBonus').value),
+                adText: document.getElementById('adText').value,
+                primaryColor: document.getElementById('primaryColor').value,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            db.collection('appSettings').doc('main').set(settings, { merge: true })
+                .then(() => {
+                    alert('Settings saved successfully');
+                    updateAdminAppSettings(settings);
+                })
+                .catch(error => {
+                    alert('Error saving settings: ' + error.message);
+                });
+        }
+
+        // Notifications
+        async function loadNotifications() {
+            const notificationsSnapshot = await db.collection('notifications')
+                .orderBy('createdAt', 'desc')
+                .limit(10)
+                .get();
+            
+            const notificationsTable = document.getElementById('notificationsTable');
+            notificationsTable.innerHTML = '';
+            
+            notificationsSnapshot.forEach(doc => {
+                const notification = doc.data();
+                const date = new Date(notification.createdAt?.seconds * 1000).toLocaleString();
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${notification.title}</td>
+                    <td>${notification.message.substring(0, 50)}...</td>
+                    <td>${date}</td>
+                `;
+                notificationsTable.appendChild(row);
+            });
+        }
+
+        function sendNotification() {
+            const title = document.getElementById('notificationTitle').value;
+            const message = document.getElementById('notificationMessage').value;
+            const link = document.getElementById('notificationLink').value;
+            
+            if (!title || !message) {
+                alert('Please fill title and message');
+                return;
+            }
+            
+            const notification = {
+                title: title,
+                message: message,
+                link: link || '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            db.collection('notifications').add(notification)
+                .then(() => {
+                    alert('Notification sent to all users');
+                    document.getElementById('notificationTitle').value = '';
+                    document.getElementById('notificationMessage').value = '';
+                    document.getElementById('notificationLink').value = '';
+                    loadNotifications();
+                })
+                .catch(error => {
+                    alert('Error sending notification: ' + error.message);
+                });
+        }
+
+        // Export Users
+        function exportUsers() {
+            alert('Export functionality would generate a CSV file of all users');
+        }
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            if (appSettingsUnsubscribe) {
+                appSettingsUnsubscribe();
+            }
+        });
+    </script>
+    <script src="https://pl28405248.effectivegatecpm.com/81/65/22/816522f67d84669fce27ce8cdbd4c578.js"></script>
+</body>
+</html>
